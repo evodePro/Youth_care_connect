@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advisor Registration | YouthCare Connect</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Supabase CDN (UMD Version for file:// support) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+</head>
+<body class="auth-page" style="height: auto; min-height: 100vh;">
+  <div class="hero-bg">
+    <div class="hero-overlay" style="opacity: 0.95; background: linear-gradient(135deg, #0F766E 0%, #0D9488 40%, #14B8A6 100%);"></div>
+  </div>
+
+  <nav class="navbar scrolled" style="background: transparent; border-bottom: none;">
+    <div class="nav-container">
+      <a href="../index.html" class="logo" style="text-decoration:none; color:inherit;">
+        <img src="../assets/youthcare_logo.png" alt="YouthCare Logo" />
+        YouthCare Connect
+      </a>
+      <div class="nav-links">
+        <a href="../index.html">Back to Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="auth-container" style="padding-top: 120px;">
+    <div class="auth-card" id="authCard" style="max-width: 600px;">
+      <h2 class="mb-4">Register as a Consultant</h2>
+      <p class="opacity-70 mb-5">Fill out your details. Once registered, an admin must approve your account.</p>
+      
+      <form id="registerForm">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" id="fullName" required />
+          </div>
+          <div class="input-group">
+            <label>Work Email</label>
+            <input type="email" id="email" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div class="input-group">
+            <label>Organization / Health Facility</label>
+            <input type="text" id="organization" required />
+          </div>
+          <div class="input-group">
+            <label>Role</label>
+            <select id="role" class="w-100" style="padding:16px; border:1px solid var(--color-card-border); border-radius:var(--radius-md); font-family:var(--font-main);" required>
+              <option value="Health Advisor">Health Advisor</option>
+              <option value="Peer Educator">Peer Educator</option>
+              <option value="Counselor">Counselor</option>
+              <option value="Clinic Staff">Clinic Staff</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Profile Picture (Optional)</label>
+          <input type="file" id="profilePic" accept="image/*" style="padding:10px; background:#F8FAFC;" />
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div class="input-group">
+            <label>Phone Number (Internal Only)</label>
+            <input type="tel" id="phone" required />
+          </div>
+          <div class="input-group">
+            <label>Secret Invite Code</label>
+            <input type="text" id="inviteCode" placeholder="Required" required />
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+          <div class="input-group">
+            <label>Password (Min 8 Chars)</label>
+            <input type="password" id="password" minlength="8" required />
+          </div>
+          <div class="input-group mb-5">
+            <label>Confirm Password</label>
+            <input type="password" id="confirmPassword" minlength="8" required />
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary w-100" id="regBtn">Create Account</button>
+      </form>
+      
+      <div class="auth-footer mt-4 text-center">
+        <p class="opacity-70 mb-2" style="font-size: 0.9rem;">Already have an account? <a href="login.html" style="color:var(--color-primary);">Log in here</a></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Load Config First -->
+  <script src="../supabase-config.js"></script>
+  <!-- Then Middleware -->
+  <script src="middleware.js"></script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      gsap.fromTo("#authCard", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 });
+      
+      const form = document.getElementById('registerForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!window.supabaseClient) {
+          alert("Supabase is not initialized. Check your internet connection or console.");
+          return;
+        }
+
+        const password = document.getElementById('password').value;
+        const confirmPwd = document.getElementById('confirmPassword').value;
+        const inviteCode = document.getElementById('inviteCode').value;
+
+        if (inviteCode !== "YOUTHCARE2024") {
+          return alert("Invalid invite code. You are not authorized.");
+        }
+        if (password !== confirmPwd) {
+          return alert("Passwords do not match!");
+        }
+
+        const btn = document.getElementById('regBtn');
+        const originalBtnText = btn.innerText;
+        btn.innerText = "Registering...";
+        btn.disabled = true;
+        
+        const email = document.getElementById('email').value;
+        const fullName = document.getElementById('fullName').value;
+        const org = document.getElementById('organization').value;
+        const role = document.getElementById('role').value;
+        const phone = document.getElementById('phone').value;
+
+        try {
+          // 1. Sign up auth user
+          const { data: authData, error: authErr } = await window.supabaseClient.auth.signUp({ 
+            email, password 
+          });
+
+          if (authErr) {
+            alert("Registration Auth Error: " + authErr.message);
+            btn.innerText = originalBtnText;
+            btn.disabled = false;
+            return;
+          }
+
+          if (!authData || !authData.user) {
+            alert("Auth succeeded but no user data returned. Check if 'Confirm Email' is ON in Supabase Settings!");
+            btn.innerText = originalBtnText;
+            btn.disabled = false;
+            return;
+          }
+
+          // 1.5 Upload Profile Picture if provided
+          let profilePicUrl = null;
+          const picInput = document.getElementById('profilePic');
+          if (picInput.files && picInput.files.length > 0) {
+            btn.innerText = "Uploading Photo...";
+            const file = picInput.files[0];
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${authData.user.id}-${Date.now()}.${fileExt}`;
+            
+            const { data: uploadData, error: uploadErr } = await window.supabaseClient.storage
+              .from('profiles')
+              .upload(fileName, file);
+              
+            if (uploadErr) {
+              console.error("Upload error:", uploadErr);
+              alert("Could not upload profile picture, but registration will continue. Error: " + uploadErr.message);
+            } else {
+              const { data: publicUrlData } = window.supabaseClient.storage
+                .from('profiles')
+                .getPublicUrl(fileName);
+              profilePicUrl = publicUrlData.publicUrl;
+            }
+          }
+
+          btn.innerText = "Saving Profile...";
+
+          // 2. Insert into advisors table via SECURITY DEFINER function
+          // This bypasses RLS (needed when email confirmation is enabled)
+          const { error: dbErr } = await window.supabaseClient.rpc('create_advisor_profile', {
+            advisor_id: authData.user.id,
+            advisor_full_name: fullName,
+            advisor_email: email,
+            advisor_organization: org,
+            advisor_role: role,
+            advisor_phone: phone,
+            advisor_profile_picture: profilePicUrl
+          });
+
+          if (dbErr) {
+            console.error("Profile insert error:", dbErr);
+            alert("Auth worked, but database profile failed: " + dbErr.message);
+            btn.innerText = originalBtnText;
+            btn.disabled = false;
+            return;
+          }
+
+          alert("Success! Your account is pending approval. An admin will activate it shortly.");
+          window.location.href = 'pending.html';
+        } catch (err) {
+          console.error("CRITICAL ERROR", err);
+          alert("A critical error occurred: " + (err.message || err));
+          btn.innerText = originalBtnText;
+          btn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

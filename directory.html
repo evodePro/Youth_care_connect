@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find An Advisor | YouthCare Connect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Supabase CDN (pinned version for speed) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+  <style>
+    /* Loading skeleton animation */
+    .skeleton-card {
+      background: var(--color-card-bg);
+      border: 1px solid var(--color-card-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .skeleton-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      100% { left: 100%; }
+    }
+    .skeleton-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--color-nav-border);
+    }
+    .skeleton-line {
+      height: 14px; border-radius: 6px;
+      background: var(--color-nav-border);
+      margin-bottom: 10px;
+    }
+    .skeleton-line.short { width: 40%; }
+    .skeleton-line.medium { width: 65%; }
+    .skeleton-line.long { width: 90%; }
+    .skeleton-btn {
+      height: 44px; border-radius: var(--radius-md);
+      background: var(--color-nav-border);
+      margin-top: 16px;
+    }
+    /* Advisor card hover enhancement */
+    .advisor-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .advisor-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.1);
+    }
+    /* Status indicator for online advisors */
+    .advisor-status {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--color-accent);
+      margin-bottom: 12px;
+    }
+    .advisor-status .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--color-accent);
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.3); }
+    }
+    .retry-banner {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 24px;
+      background: var(--color-card-bg);
+      border-radius: var(--radius-lg);
+      border: 1px dashed var(--color-card-border);
+    }
+    .retry-banner h3 { margin-bottom: 10px; }
+    .retry-banner p { opacity: 0.7; margin-bottom: 20px; }
+  </style>
+</head>
+<body style="background: var(--color-bg); color: var(--color-text); min-height: 100vh;">
+
+  <!-- NAVIGATION -->
+  <nav class="navbar scrolled" style="position: sticky; top:0; z-index: 100;">
+    <div class="nav-container">
+      <a href="index.html" class="logo" style="text-decoration:none;">
+        <img src="assets/youthcare_logo.png" alt="YouthCare Logo" />
+        <span style="color:var(--color-text);">YouthCare Connect</span>
+      </a>
+      <div class="nav-search">
+        <span class="search-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" placeholder="Search for health resources..." id="navSearchInput" />
+      </div>
+
+      <div class="nav-links">
+        <a href="index.html#services" style="color:var(--color-text);">Services</a>
+        <a href="quizzes.html" style="color:var(--color-text);">Resources</a>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Mode">
+          <svg class="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn btn-primary" onclick="window.location.href='directory.html'">Find an Advisor</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="section-padding" style="padding-top: 80px; text-align: center;">
+    <div class="container animate-up">
+      <h1 style="font-size: 3rem; margin-bottom: 20px;">Choose Your Consultant</h1>
+      <p style="max-width: 600px; margin: 0 auto; opacity: 0.8; font-size: 1.1rem;">
+        You have the power to select who you talk to. Browse our verified advisors below and pick someone specializing in what you need today. You will remain 100% anonymous.
+      </p>
+      
+      <!-- Filters (Visual Mockup) -->
+      <div style="margin-top: 40px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <button class="btn btn-primary">All Advisors</button>
+        <button class="btn btn-outline">Mental Health</button>
+        <button class="btn btn-outline">Sexual Health</button>
+        <button class="btn btn-outline">Relationships</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- DIRECTORY GRID -->
+  <section class="section-padding" style="padding-top: 1rem;">
+    <div class="container">
+      <div id="directoryGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+        <!-- Hydrated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <script src="supabase-config.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Animation standard
+      document.querySelectorAll(".animate-up").forEach(el => el.style.visibility = "visible");
+      gsap.fromTo(".animate-up", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease: "power3.out" });
+
+      const grid = document.getElementById("directoryGrid");
+      
+      // Show skeleton loading cards immediately
+      function showSkeletons(count = 6) {
+        grid.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+          const skeleton = document.createElement('div');
+          skeleton.className = 'skeleton-card';
+          skeleton.innerHTML = `
+            <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+              <div class="skeleton-avatar"></div>
+              <div style="flex:1;">
+                <div class="skeleton-line medium"></div>
+                <div class="skeleton-line short"></div>
+              </div>
+            </div>
+            <div class="skeleton-line short" style="margin-bottom:16px;"></div>
+            <div class="skeleton-line long"></div>
+            <div class="skeleton-line medium"></div>
+            <div class="skeleton-btn"></div>
+          `;
+          grid.appendChild(skeleton);
+          gsap.fromTo(skeleton, { opacity: 0 }, { opacity: 1, duration: 0.3, delay: i * 0.05 });
+        }
+      }
+
+      showSkeletons();
+
+      // Wait for Supabase to be ready (with timeout)
+      async function waitForSupabase(timeoutMs = 8000) {
+        const start = Date.now();
+        while (!window.supabaseClient && (Date.now() - start) < timeoutMs) {
+          await new Promise(r => setTimeout(r, 100));
+        }
+        return !!window.supabaseClient;
+      }
+
+      async function loadAdvisors() {
+        const ready = await waitForSupabase();
+        if (!ready) {
+          console.error("Supabase init timed out");
+          showError("Connection is taking longer than expected. Please check your internet connection.");
+          return;
+        }
+
+        let advisors = [];
+        try {
+          advisors = await window.fetchApprovedAdvisors();
+        } catch (err) {
+          console.error("Failed to fetch advisors:", err);
+          showError("Could not connect to the server. Please check your internet connection.");
+          return;
+        }
+        
+        grid.innerHTML = "";
+
+        if (!advisors || advisors.length === 0) {
+          grid.innerHTML = `
+            <div class="retry-banner">
+              <div style="font-size: 3rem; margin-bottom: 20px;">🕵️</div>
+              <h3>No advisors available right now</h3>
+              <p>Check back soon! We are currently vetting new specialists.</p>
+              <button class="btn btn-outline" onclick="location.reload()">Refresh</button>
+            </div>
+          `;
+          return;
+        }
+        
+        renderAdvisors(advisors);
+      }
+
+      function showError(message) {
+        grid.innerHTML = `
+          <div class="retry-banner">
+            <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
+            <h3>Connection Error</h3>
+            <p>${message}</p>
+            <button class="btn btn-primary" id="retryBtn">Retry</button>
+          </div>
+        `;
+        document.getElementById('retryBtn').addEventListener('click', () => {
+          showSkeletons();
+          loadAdvisors();
+        });
+      }
+
+      function renderAdvisors(advisors) {
+        advisors.forEach((c, index) => {
+          const card = document.createElement("div");
+          card.className = "quiz-card advisor-card";
+          
+          // Generate initials for avatar
+          const initials = c.full_name.split(' ').map(n => n[0]).join('').toUpperCase();
+          
+          // Generate a unique hue based on name for avatar color variety
+          let hash = 0;
+          for (let i = 0; i < c.full_name.length; i++) hash = c.full_name.charCodeAt(i) + ((hash << 5) - hash);
+          const hue = Math.abs(hash % 360);
+
+          const avatarHtml = c.profile_picture_url 
+            ? `<img src="${c.profile_picture_url}" alt="${c.full_name}" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" />`
+            : `<div style="width: 64px; height: 64px; border-radius: 50%; background: hsl(${hue}, 45%, 90%); color: hsl(${hue}, 55%, 40%); font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${initials}</div>`;
+
+          card.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+              ${avatarHtml}
+              <div>
+                <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--color-text); margin: 0;">${c.full_name}</h3>
+                <span style="font-size: 0.85rem; color: var(--color-accent); font-weight: 500;">${c.role}</span>
+              </div>
+            </div>
+            <div class="advisor-status">
+              <span class="dot"></span> Available Now
+            </div>
+            <div style="background: var(--color-nav-border); padding: 6px 12px; border-radius: var(--radius-full); font-size: 0.8rem; display: inline-block; margin-bottom: 16px; font-weight: 500;">
+              ${c.organization}
+            </div>
+            <p style="opacity: 0.8; margin-bottom: 24px; font-size: 0.95rem; min-height: 44px;">
+              Professional health guidance focused on your well-being and privacy.
+            </p>
+            <button class="btn btn-primary w-100" onclick="window.location.href='chat.html?advisorId=${c.id}'">Connect Anonymously</button>
+          `;
+          
+          grid.appendChild(card);
+          
+          gsap.fromTo(card, 
+            { y: 40, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", delay: 0.08 * index }
+          );
+        });
+      }
+
+      // Start loading
+      loadAdvisors();
+    });
+  </script>
+
+  <!-- HELP & SUPPORT HUB -->
+  <section class="section-padding" id="help" style="background: var(--color-bg);">
+    <div class="container">
+      <div class="section-header text-center mb-5 fade-in">
+        <div class="section-badge mb-3">Help & Support</div>
+        <h2 style="font-size: 2.5rem; text-align: center; margin-bottom: 20px;">Need Immediate Assistance?</h2>
+        <p style="max-width: 650px; margin: 0 auto; opacity: 0.8; text-align: center;">Whether you're in a crisis or just need a hand navigating the platform, we've got you covered 24/7.</p>
+      </div>
+
+      <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2.5rem;">
+        <div class="help-card fade-in" style="background: var(--color-accent-soft); padding: 40px; border-radius: var(--radius-lg); border: 2px solid var(--color-accent);">
+          <div class="faq-icon-wrap mb-4" style="background: var(--color-bg);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <h3 style="font-size: 1.5rem; margin-bottom: 12px; color: var(--color-text);">Emergency Hotlines</h3>
+          <ul style="list-style: none; padding: 0;">
+            <li class="mb-3">
+              <a href="tel:+250792421686" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--color-accent); font-weight: 600; font-size: 1.1rem;">
+                <span class="icon">📞</span> +250 792 421 686 (Emergency Services)
+              </a>
+            </li>
+            <li class="mb-3">
+              <a href="tel:+250791844573" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--color-accent); font-weight: 600; font-size: 1.1rem;">
+                <span class="icon">📞</span> +250 791 844 573 (Mental Health Services)
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLOATING HELP BUTTON -->
+  <div class="floating-help" id="floatingHelpBtn">
+    <span class="icon">❔</span>
+    <span class="help-tooltip">Need Help?</span>
+  </div>
+
+  <!-- Theme toggle + smooth scroll (lightweight, no heavy index animations) -->
+  <script>
+    // Theme system
+    (function() {
+      const html = document.documentElement;
+      const saved = localStorage.getItem('theme');
+      const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      html.setAttribute('data-theme', saved || system);
+
+      document.addEventListener('click', (e) => {
+        const toggle = e.target.closest('.theme-toggle');
+        if (toggle) {
+          const cur = html.getAttribute('data-theme');
+          const next = cur === 'light' ? 'dark' : 'light';
+          html.setAttribute('data-theme', next);
+          localStorage.setItem('theme', next);
+        }
+      });
+
+      // Smooth scroll
+      document.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+          const target = document.querySelector(link.getAttribute('href'));
+          if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+        });
+      });
+
+      // Floating help button
+      const helpBtn = document.getElementById('floatingHelpBtn');
+      if (helpBtn) {
+        gsap.to(helpBtn, { y: -10, duration: 1.5, repeat: -1, yoyo: true, ease: 'power1.inOut' });
+        helpBtn.addEventListener('click', () => {
+          const helpSection = document.getElementById('help');
+          if (helpSection) helpSection.scrollIntoView({ behavior: 'smooth' });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

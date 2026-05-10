@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anonymous Chat | YouthCare Connect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Supabase CDN (UMD Version for file:// support) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+</head>
+<body class="chat-page">
+
+  <!-- USERNAME PROMPT MODAL -->
+  <div id="usernameModal">
+    <div class="modal-card">
+      <h2>Welcome</h2>
+      <p class="opacity-70 mb-4">Please enter a username to join the anonymous chat.</p>
+      <input type="text" id="usernameInput" placeholder="Choose a username..." class="w-100 mb-4" style="padding:16px; border:1px solid var(--color-card-border); border-radius:var(--radius-md); font-family:var(--font-main);" />
+      <button class="btn btn-primary w-100" id="joinBtn">Join Chat</button>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav class="navbar scrolled">
+    <div class="nav-container">
+      <a href="index.html" class="logo" style="text-decoration:none; color:inherit;">
+        <img src="assets/youthcare_logo.png" alt="YouthCare Logo" />
+        YouthCare Connect
+      </a>
+      <div class="nav-links">
+        <a href="index.html#services">Services</a>
+        <a href="quizzes.html">Resources</a>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-outline" onclick="window.location.href='index.html'">End Chat & Leave</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CHAT INTERFACE -->
+  <main class="chat-container" style="display:none;" id="mainChatUI">
+    <div class="chat-header">
+      <div class="chat-status">
+        <span class="status-dot"></span>
+        <h3>Connected to Advisor</h3>
+      </div>
+      <p class="privacy-badge">🔒 100% Anonymous & Secure</p>
+    </div>
+
+    <div class="chat-box" id="chatBox">
+      <!-- Chat messages will be injected here -->
+      <div class="message system">
+        <p>Connecting to a secure channel...</p>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <input type="text" id="messageInput" placeholder="Type your message here..." />
+      <button class="btn btn-primary send-btn" id="sendBtn">
+        <span class="icon">➤</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- Load Config -->
+  <script src="supabase-config.js"></script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const chatBox = document.getElementById('chatBox');
+      const messageInput = document.getElementById('messageInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const usernameModal = document.getElementById('usernameModal');
+      const mainChatUI = document.getElementById('mainChatUI');
+      const joinBtn = document.getElementById('joinBtn');
+      const usernameInput = document.getElementById('usernameInput');
+      
+      // Generate a unique ID for this youth user session
+      let currentUser = { uid: 'youth-' + Math.random().toString(36).substr(2, 9) };
+      let activeChatId = null;
+      // Track messages we've optimistically rendered to prevent duplicates
+      const optimisticallyRendered = new Set();
+
+      // Read Advisor ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const advisorId = urlParams.get('advisorId');
+      
+      if (!advisorId) {
+        alert("No advisor selected. Redirecting to directory...");
+        window.location.href = 'directory.html';
+        return;
+      }
+
+      if (!window.getAdvisorById) {
+        console.error("getAdvisorById not found on window. Supabase config may not have loaded.");
+        return;
+      }
+
+      const targetAdvisor = await window.getAdvisorById(advisorId);
+
+      // Update UI with advisor name
+      if (targetAdvisor) {
+        document.querySelector('.chat-status h3').innerText = `Connected to ${targetAdvisor.full_name}`;
+      }
+
+      // Check for existing session in localStorage
+      const savedUsername = localStorage.getItem('youth_username');
+      if (savedUsername) {
+        usernameInput.value = savedUsername;
+      }
+
+      // Join Chat Logic
+      joinBtn.addEventListener('click', async () => {
+        const username = usernameInput.value.trim();
+        if (username) {
+          localStorage.setItem('youth_username', username);
+          joinBtn.innerText = "Connecting...";
+          joinBtn.disabled = true;
+
+          try {
+            activeChatId = await window.initializeYouthSession(username, advisorId);
+            
+            gsap.to(usernameModal, { opacity: 0, duration: 0.3, onComplete: () => {
+              usernameModal.style.display = 'none';
+              mainChatUI.style.display = 'flex';
+              gsap.fromTo(mainChatUI, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 });
+              startChatRealtime(username);
+            }});
+          } catch (err) {
+            console.error("Connection error:", err);
+            alert("Connection error. Please check your internet connection and try again.");
+            joinBtn.innerText = "Join Chat";
+            joinBtn.disabled = false;
+          }
+        } else {
+          alert('Please enter a username');
+        }
+      });
+
+      function startChatRealtime(username) {
+        chatBox.innerHTML = '';
+        
+        const welcomeString = targetAdvisor 
+          ? `Welcome, ${username}. You are now securely connected to ${targetAdvisor.full_name}.`
+          : `Welcome, ${username}. You are now connected privately.`;
+          
+        appendMessage(welcomeString, 'system');
+        
+        // Subscribe to real-time messages using the improved listenForMessages
+        window.listenForMessages(activeChatId, (msg, isHistory) => {
+          // For real-time messages (not history): skip our own messages
+          // because we already rendered them optimistically
+          if (!isHistory && msg.sender_id === currentUser.uid) {
+            return; // Already shown via optimistic UI
+          }
+          appendMessage(msg.content, msg.role, msg.id);
+        }, (deletedMsgId) => {
+          // Real-time deletion: remove message from DOM
+          const el = document.querySelector(`[data-msg-id="${deletedMsgId}"]`);
+          if (el) {
+            gsap.to(el, { opacity: 0, height: 0, padding: 0, margin: 0, duration: 0.3, ease: "power2.in", onComplete: () => el.remove() });
+          }
+          renderedMsgIds.delete(deletedMsgId);
+        });
+      }
+
+      // Handle deleting a message
+      async function deleteMsg(msgId, el) {
+        if (!msgId) return;
+        try {
+          gsap.to(el, { opacity: 0.4, scale: 0.95, duration: 0.2 });
+          await window.deleteMessage(msgId);
+          gsap.to(el, { opacity: 0, height: 0, padding: 0, margin: 0, duration: 0.3, onComplete: () => el.remove() });
+          renderedMsgIds.delete(msgId);
+        } catch (err) {
+          console.error("Failed to delete message:", err);
+          gsap.to(el, { opacity: 1, scale: 1, duration: 0.2 });
+        }
+      }
+
+      // Handle sending messages
+      async function handleSend() {
+        const text = messageInput.value.trim();
+        if (text && activeChatId) {
+          // Optimistic UI: show message immediately
+          const tempId = 'temp-' + Date.now();
+          appendMessage(text, 'youth', tempId);
+          messageInput.value = '';
+          
+          try {
+            await window.sendMessage(activeChatId, currentUser.uid, 'youth', text);
+          } catch (err) {
+            console.error("Message send failed", err);
+          }
+        }
+      }
+
+      sendBtn.addEventListener('click', handleSend);
+      messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSend();
+      });
+
+      // Set of rendered message IDs to prevent duplicates
+      const renderedMsgIds = new Set();
+
+      function appendMessage(text, role, msgId) {
+        // Skip if already rendered (by message ID)
+        if (msgId && renderedMsgIds.has(msgId)) return;
+        if (msgId) renderedMsgIds.add(msgId);
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${role}`;
+        if (msgId) msgDiv.setAttribute('data-msg-id', msgId);
+        
+        // Add delete button for non-system messages with real IDs (not temp)
+        const isRealId = msgId && !String(msgId).startsWith('temp-');
+        const deleteBtn = (role !== 'system' && isRealId) 
+          ? `<button class="msg-delete-btn" title="Delete message">✕</button>` 
+          : '';
+        msgDiv.innerHTML = `${deleteBtn}<p>${text}</p>`;
+        
+        // Attach delete handler
+        const btn = msgDiv.querySelector('.msg-delete-btn');
+        if (btn) {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteMsg(msgId, msgDiv);
+          });
+        }
+
+        chatBox.appendChild(msgDiv);
+        
+        gsap.fromTo(msgDiv, 
+          { y: 10, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" }
+        );
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    });
+  </script>
+</body>
+</html>

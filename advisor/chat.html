@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advisor Chat Room | YouthCare Connect</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Supabase CDN (UMD Version for file:// support) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+</head>
+<body class="chat-page">
+
+  <!-- NAVIGATION -->
+  <nav class="navbar scrolled">
+    <div class="nav-container">
+      <a href="dashboard.html" class="logo" style="text-decoration:none; color:inherit;">
+        <img src="../assets/youthcare_logo.png" alt="YouthCare Logo" />
+        YCC Advisor Chat
+      </a>
+      <div class="nav-links">
+        <a href="dashboard.html">Back to Dashboard</a>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-outline" id="endSessionBtn">End Session</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CHAT INTERFACE -->
+  <main class="chat-container" id="mainChatUI">
+    <div class="chat-header">
+      <div class="chat-status">
+        <span class="status-dot"></span>
+        <h3 id="youthName">Connected to Youth User</h3>
+      </div>
+      <p class="privacy-badge">🔒 Secure Consultation</p>
+    </div>
+
+    <div class="chat-box" id="chatBox">
+      <div class="message system">
+        <p>Initializing secure connection...</p>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <input type="text" id="messageInput" placeholder="Type your professional response here..." />
+      <button class="btn btn-primary send-btn" id="sendBtn">
+        <span class="icon">➤</span>
+      </button>
+    </div>
+  </main>
+
+  <script src="../supabase-config.js"></script>
+  <script src="middleware.js"></script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const chatBox = document.getElementById('chatBox');
+      const messageInput = document.getElementById('messageInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const youthNameEl = document.getElementById('youthName');
+      const endSessionBtn = document.getElementById('endSessionBtn');
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const chatId = urlParams.get('chatId');
+
+      // Set of rendered message IDs to prevent duplicates
+      const renderedMsgIds = new Set();
+      let currentSession = null;
+
+      // Helper: show a status message in chatBox
+      function showStatus(msg) {
+        chatBox.innerHTML = `<div class="message system"><p>${msg}</p></div>`;
+      }
+
+      if (!chatId) {
+        alert("Invalid chat ID.");
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      // Wait for Supabase to be ready
+      showStatus("Connecting to server...");
+      let waitTime = 0;
+      while (!window.supabaseClient && waitTime < 10000) {
+        await new Promise(r => setTimeout(r, 200));
+        waitTime += 200;
+      }
+
+      if (!window.supabaseClient) {
+        showStatus("⚠️ Could not connect to server. Please reload the page.");
+        console.error("Supabase not initialized after timeout");
+        return;
+      }
+
+      // 1. Get Session
+      showStatus("Verifying your session...");
+      const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
+      
+      if (sessionError) {
+        showStatus("⚠️ Session error: " + sessionError.message);
+        console.error("Session error:", sessionError);
+        return;
+      }
+      
+      if (!session) {
+        showStatus("⚠️ You are not logged in. Redirecting...");
+        setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+        return;
+      }
+
+      currentSession = session;
+      console.log("Advisor session OK. User ID:", session.user.id);
+
+      // 2. Fetch Chat Details
+      showStatus("Loading chat...");
+      const chat = await window.getChatById(chatId);
+
+      if (chat) {
+        youthNameEl.innerText = `Chat with ${chat.youth_username}`;
+        chatBox.innerHTML = '';
+        appendMessage(`You are now chatting with ${chat.youth_username}. This connection is secure and private.`, 'system');
+        console.log("Chat loaded:", chat.id, "Youth:", chat.youth_username);
+      } else {
+        showStatus("⚠️ Could not load chat details. The chat may have been ended.");
+        console.error("Chat not found for ID:", chatId);
+        return;
+      }
+
+      // 3. Load existing messages + subscribe to real-time
+      showStatus("Loading messages...");
+      chatBox.innerHTML = '';
+      appendMessage(`You are now chatting with ${chat.youth_username}. This connection is secure and private.`, 'system');
+
+      window.listenForMessages(chatId, (msg, isHistory) => {
+        // For real-time (not history): skip our own messages (already shown via optimistic UI)
+        if (!isHistory && msg.sender_id === currentSession.user.id) {
+          return;
+        }
+        appendMessage(msg.content, msg.role, msg.id);
+      }, (deletedMsgId) => {
+        // Real-time deletion: remove the message element from the DOM
+        const el = document.querySelector(`[data-msg-id="${deletedMsgId}"]`);
+        if (el) {
+          gsap.to(el, { opacity: 0, height: 0, padding: 0, margin: 0, duration: 0.3, ease: "power2.in", onComplete: () => el.remove() });
+        }
+        renderedMsgIds.delete(deletedMsgId);
+      });
+
+      // 4. Handle sending
+      async function handleSend() {
+        const text = messageInput.value.trim();
+        if (!text || !chatId) return;
+
+        // Optimistic UI: show message immediately
+        appendMessage(text, 'advisor');
+        messageInput.value = '';
+        messageInput.focus();
+        
+        try {
+          const result = await window.sendMessage(chatId, currentSession.user.id, 'advisor', text);
+          console.log("Message sent successfully:", result);
+        } catch (err) {
+          console.error("Failed to send message:", err);
+          appendMessage('⚠️ Message failed to send: ' + (err.message || 'Unknown error. Please try again.'), 'system');
+        }
+      }
+
+      // Handle deleting a message
+      async function deleteMsg(msgId, el) {
+        if (!msgId) return;
+        try {
+          gsap.to(el, { opacity: 0.4, scale: 0.95, duration: 0.2 });
+          await window.deleteMessage(msgId);
+          // Real-time subscription will handle removal, but also remove locally
+          gsap.to(el, { opacity: 0, height: 0, padding: 0, margin: 0, duration: 0.3, onComplete: () => el.remove() });
+          renderedMsgIds.delete(msgId);
+        } catch (err) {
+          console.error("Failed to delete message:", err);
+          gsap.to(el, { opacity: 1, scale: 1, duration: 0.2 });
+        }
+      }
+
+      sendBtn.addEventListener('click', handleSend);
+      messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSend();
+      });
+
+      // Focus the input field
+      messageInput.focus();
+
+      // 5. End Session handler
+      endSessionBtn.addEventListener('click', async () => {
+        if (confirm('Are you sure you want to end this chat session?')) {
+          try {
+            await window.endChat(chatId);
+          } catch (err) {
+            console.error("Error ending chat:", err);
+          }
+          window.location.href = 'dashboard.html';
+        }
+      });
+
+      function appendMessage(text, role, msgId) {
+        // Skip if already rendered (by message ID)
+        if (msgId && renderedMsgIds.has(msgId)) return;
+        if (msgId) renderedMsgIds.add(msgId);
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${role}`;
+        if (msgId) msgDiv.setAttribute('data-msg-id', msgId);
+        
+        // Add delete button for non-system messages
+        const deleteBtn = (role !== 'system' && msgId) 
+          ? `<button class="msg-delete-btn" title="Delete message">✕</button>` 
+          : '';
+        msgDiv.innerHTML = `${deleteBtn}<p>${text}</p>`;
+        
+        // Attach delete handler
+        const btn = msgDiv.querySelector('.msg-delete-btn');
+        if (btn) {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteMsg(msgId, msgDiv);
+          });
+        }
+
+        chatBox.appendChild(msgDiv);
+        
+        gsap.fromTo(msgDiv, 
+          { y: 10, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" }
+        );
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    });
+  </script>
+</body>
+</html>
