@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://youth-care-connect.netlify.app/sitemap.xml

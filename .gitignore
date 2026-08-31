@@ -21,3 +21,5 @@ node_modules/
 
 # Empty directories
 antigrav1/
+
+.vercel
