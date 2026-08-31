@@ -19,8 +19,8 @@
         YCC Advisor
       </div>
       <div class="nav-links">
-        <a href="#" style="color:var(--color-text);">Active Sessions</a>
-        <a href="#" style="color:var(--color-text-light);">History</a>
+        <a href="#" class="nav-tab active" data-tab="queue" id="tabQueue" style="color:var(--color-text);">Active Sessions</a>
+        <a href="#" class="nav-tab" data-tab="profile" id="tabProfile" style="color:var(--color-text-light);">Profile Settings</a>
       </div>
       <div class="nav-actions" style="display:flex; align-items:center;">
         <div id="advisorProfilePic" style="width: 36px; height: 36px; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-accent); display: none; align-items: center; justify-content: center; margin-right: 12px; font-weight: bold; overflow: hidden; border: 2px solid var(--color-card-border);"></div>
@@ -31,11 +31,95 @@
   </nav>
 
   <main class="container" style="padding-top: 100px; padding-bottom: 60px;">
-    <h1 style="font-size: 2.5rem; margin-bottom: 8px; color: var(--color-text);">Incoming Requests</h1>
-    <p class="mb-5" style="color: var(--color-text-light);">Youth users currently waiting for an advisor.</p>
+    <!-- Active Queue Section -->
+    <div id="queueSection">
+      <h1 style="font-size: 2.5rem; margin-bottom: 8px; color: var(--color-text);">Incoming Requests</h1>
+      <p class="mb-5" style="color: var(--color-text-light);">Youth users currently waiting for an advisor.</p>
 
-    <div id="queueList" style="background: var(--color-card-bg); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-card-border); overflow: hidden;">
-      
+      <!-- Quick prompt to add photo -->
+      <div id="queuePhotoPrompt" style="display: none; background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%); border-radius: var(--radius-md); padding: 20px 24px; margin-bottom: 24px; align-items: center; justify-content: space-between; gap: 20px; color: white;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="font-size: 1.5rem;">📸</div>
+          <div>
+            <div style="font-weight: 600; margin-bottom: 2px;">Add your profile photo</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Youth can see your photo before connecting</div>
+          </div>
+        </div>
+        <button class="btn" style="background: white; color: #0D9488; font-weight: 600;" onclick="switchToProfile()">Add Photo</button>
+      </div>
+
+      <div id="queueList" style="background: var(--color-card-bg); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-card-border); overflow: hidden;">
+        <!-- Hydrated by JS -->
+      </div>
+    </div>
+
+    <!-- Profile Settings Section (Hidden by default) -->
+    <div id="profileSection" style="display: none;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 8px; color: var(--color-text);">Profile Settings</h1>
+      <p class="mb-5" style="color: var(--color-text-light);">Manage your public identity and account details.</p>
+
+      <!-- Missing Photo Warning -->
+      <div id="photoReminder" style="background: #FEF3C7; border: 1px solid #F59E0B; border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px; display: none; align-items: center; gap: 16px;">
+        <div style="font-size: 2rem;">📸</div>
+        <div style="flex: 1;">
+          <h4 style="margin: 0 0 4px 0; color: #92400E;">Add Your Profile Photo</h4>
+          <p style="margin: 0; font-size: 0.9rem; color: #B45309;">Youth users can see your photo before connecting. A friendly photo helps build trust!</p>
+        </div>
+        <button class="btn" style="background: #F59E0B; color: white; font-weight: 600;" onclick="document.getElementById('newProfilePic').click()">Upload Photo</button>
+      </div>
+
+      <div style="background: var(--color-card-bg); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-card-border); padding: 40px; max-width: 800px;">
+        <form id="profileForm">
+          <div style="display: flex; align-items: flex-start; gap: 30px; margin-bottom: 40px;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+              <div id="profilePicLarge" style="width: 120px; height: 120px; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-accent); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; overflow: hidden; border: 4px solid var(--color-bg); transition: border-color 0.3s ease;">
+                <!-- Avatar or Initials -->
+              </div>
+              <!-- Preview overlay text -->
+              <div id="previewLabel" style="display: none; font-size: 0.75rem; color: var(--color-accent); font-weight: 500; text-align: center;">New Preview ↑</div>
+            </div>
+            <div class="input-group" style="margin: 0; flex: 1;">
+              <label>Update Profile Photo <span style="color: var(--color-accent); font-weight: 500;">(Important!)</span></label>
+              <input type="file" id="newProfilePic" accept="image/jpeg,image/png,image/gif,image/webp" style="padding: 10px; background: var(--color-bg);" />
+              <p style="font-size: 0.8rem; margin-top: 8px; color: var(--color-text-light);">Max 5MB · JPEG, PNG, GIF, or WebP</p>
+              <p style="font-size: 0.85rem; margin-top: 4px; color: var(--color-primary);">👤 Youth can see your photo before connecting. Add a friendly, professional photo!</p>
+              <!-- Upload status indicator -->
+              <div id="uploadStatus" style="display: none; margin-top: 8px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 500;"></div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="input-group">
+              <label>Full Name</label>
+              <input type="text" id="profFullName" required />
+            </div>
+            <div class="input-group">
+              <label>Email (Read-only)</label>
+              <input type="email" id="profEmail" readonly style="background: var(--color-bg); opacity: 0.7;" />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div class="input-group">
+              <label>Organization</label>
+              <input type="text" id="profOrg" required />
+            </div>
+            <div class="input-group">
+              <label>Role</label>
+              <select id="profRole" class="w-100" style="padding:16px; border:1px solid var(--color-card-border); border-radius:var(--radius-md); font-family:var(--font-main);">
+                <option value="Health Advisor">Health Advisor</option>
+                <option value="Peer Educator">Peer Educator</option>
+                <option value="Counselor">Counselor</option>
+                <option value="Clinic Staff">Clinic Staff</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary" id="saveProfBtn">Save Changes</button>
+          </div>
+        </form>
+      </div>
     </div>
   </main>
 
@@ -46,6 +130,11 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
+      const queueSection = document.getElementById('queueSection');
+      const profileSection = document.getElementById('profileSection');
+      const tabQueue = document.getElementById('tabQueue');
+      const tabProfile = document.getElementById('tabProfile');
+      
       const queueList = document.getElementById('queueList');
       const advisorNameEl = document.getElementById('advisorName');
       
@@ -56,31 +145,242 @@
 
       // 1. Get Current Session
       const { data: { session } } = await window.supabaseClient.auth.getSession();
-      if (!session) return; // Middleware handles redirection
+      if (!session) return;
 
-      // 2. Fetch Profile Info
-      const { data: profile } = await window.supabaseClient
-        .from('advisors')
-        .select('full_name, profile_picture_url')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (profile) {
-        advisorNameEl.innerText = `${profile.full_name}`;
-        const picEl = document.getElementById('advisorProfilePic');
-        picEl.style.display = 'flex';
+      // 2. Tab Switching Logic
+      tabQueue.addEventListener('click', (e) => {
+        e.preventDefault();
+        queueSection.style.display = 'block';
+        profileSection.style.display = 'none';
+        tabQueue.classList.add('active');
+        tabProfile.classList.remove('active');
+        tabQueue.style.color = 'var(--color-text)';
+        tabProfile.style.color = 'var(--color-text-light)';
+      });
+
+      tabProfile.addEventListener('click', (e) => {
+        e.preventDefault();
+        queueSection.style.display = 'none';
+        profileSection.style.display = 'block';
+        tabProfile.classList.add('active');
+        tabQueue.classList.remove('active');
+        tabProfile.style.color = 'var(--color-text)';
+        tabQueue.style.color = 'var(--color-text-light)';
+      });
+
+      // Helper to switch to profile tab
+      window.switchToProfile = function() {
+        tabProfile.click();
+      };
+
+      // 3. Fetch Profile Info & Hydrate Form
+      async function loadProfile() {
+        const { data: profile } = await window.supabaseClient
+          .from('advisors')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
         
-        if (profile.profile_picture_url) {
-          picEl.innerHTML = `<img src="${profile.profile_picture_url}" style="width: 100%; height: 100%; object-fit: cover;" alt="Profile" />`;
-        } else {
-          picEl.innerText = profile.full_name.charAt(0).toUpperCase();
+        if (profile) {
+          // Top Nav
+          advisorNameEl.innerText = `${profile.full_name}`;
+          const picEl = document.getElementById('advisorProfilePic');
+          picEl.style.display = 'flex';
+
+          // Show reminder if no profile picture
+          const reminder = document.getElementById('photoReminder');
+          const queuePrompt = document.getElementById('queuePhotoPrompt');
+          if (!profile.profile_picture_url) {
+            if (reminder) reminder.style.display = 'flex';
+            if (queuePrompt) queuePrompt.style.display = 'flex';
+          } else {
+            if (reminder) reminder.style.display = 'none';
+            if (queuePrompt) queuePrompt.style.display = 'none';
+          }
+          
+          // Form Hydration
+          document.getElementById('profFullName').value = profile.full_name;
+          document.getElementById('profEmail').value = profile.email;
+          document.getElementById('profOrg').value = profile.organization;
+          document.getElementById('profRole').value = profile.role;
+
+          const largePicEl = document.getElementById('profilePicLarge');
+          
+          if (profile.profile_picture_url) {
+            picEl.innerHTML = `<img src="${profile.profile_picture_url}" style="width: 100%; height: 100%; object-fit: cover;" alt="Profile" />`;
+            largePicEl.innerHTML = `<img src="${profile.profile_picture_url}" style="width: 100%; height: 100%; object-fit: cover;" alt="Profile" />`;
+          } else {
+            const initial = profile.full_name.charAt(0).toUpperCase();
+            picEl.innerText = initial;
+            picEl.innerHTML = initial;
+            largePicEl.innerText = initial;
+            largePicEl.innerHTML = initial;
+          }
         }
       }
 
-      // 3. Initial Fetch of Active Chats
+      // 4. Image Preview on File Select
+      const picInput = document.getElementById('newProfilePic');
+      picInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validate immediately
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+          alert("Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.");
+          picInput.value = '';
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert("File is too large. Maximum size is 5MB.");
+          picInput.value = '';
+          return;
+        }
+
+        // Show preview in the large avatar circle
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const largePicEl = document.getElementById('profilePicLarge');
+          largePicEl.innerHTML = `<img src="${ev.target.result}" style="width: 100%; height: 100%; object-fit: cover;" alt="Preview" />`;
+          largePicEl.style.borderColor = 'var(--color-accent)';
+          const previewLabel = document.getElementById('previewLabel');
+          if (previewLabel) previewLabel.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // 5. Handle Profile Update (Save button)
+      const profileForm = document.getElementById('profileForm');
+      profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('saveProfBtn');
+        const originalText = btn.innerText;
+        const uploadStatus = document.getElementById('uploadStatus');
+        btn.innerText = "Saving...";
+        btn.disabled = true;
+
+        // Helper to show upload status
+        function showStatus(msg, type) {
+          if (!uploadStatus) return;
+          uploadStatus.style.display = 'block';
+          uploadStatus.textContent = msg;
+          if (type === 'success') {
+            uploadStatus.style.background = '#D1FAE5';
+            uploadStatus.style.color = '#065F46';
+          } else if (type === 'error') {
+            uploadStatus.style.background = '#FEE2E2';
+            uploadStatus.style.color = '#991B1B';
+          } else {
+            uploadStatus.style.background = 'var(--color-accent-soft)';
+            uploadStatus.style.color = 'var(--color-accent)';
+          }
+        }
+
+        try {
+          let updatedPicUrl = null;
+          let uploadFailed = false;
+
+          // 5a. Upload new photo if a file was selected
+          if (picInput.files && picInput.files.length > 0) {
+            const file = picInput.files[0];
+            console.log("[Profile] Uploading file:", file.name, "size:", file.size, "type:", file.type);
+            
+            try {
+              updatedPicUrl = await window.uploadProfilePicture(
+                session.user.id,
+                file,
+                (status) => {
+                  btn.innerText = status;
+                  showStatus(status, 'info');
+                }
+              );
+              console.log("[Profile] Upload succeeded! URL:", updatedPicUrl);
+              showStatus("✓ Photo uploaded! Saving profile...", 'success');
+            } catch (uploadErr) {
+              uploadFailed = true;
+              console.error("[Profile] Upload FAILED:", uploadErr);
+              showStatus("⚠ Photo upload failed: " + uploadErr.message, 'error');
+              // Continue saving other profile fields even if upload fails
+            }
+          }
+
+          btn.innerText = "Saving profile...";
+
+          // 5b. Build update payload
+          const updatePayload = {
+            full_name: document.getElementById('profFullName').value,
+            organization: document.getElementById('profOrg').value,
+            role: document.getElementById('profRole').value
+          };
+
+          if (updatedPicUrl) {
+            updatePayload.profile_picture_url = updatedPicUrl;
+            console.log("[Profile] Saving profile_picture_url to DB:", updatedPicUrl);
+          } else if (picInput.files && picInput.files.length > 0) {
+            console.warn("[Profile] File was selected but no URL obtained — photo will NOT be saved");
+          }
+
+          // 5c. Update database
+          const { error: updateErr } = await window.supabaseClient
+            .from('advisors')
+            .update(updatePayload)
+            .eq('id', session.user.id);
+
+          if (updateErr) throw updateErr;
+
+          console.log("[Profile] Database update successful. Payload:", JSON.stringify(updatePayload));
+
+          // Show appropriate final status (don't overwrite upload error)
+          if (uploadFailed) {
+            showStatus("⚠ Profile saved, but photo upload failed. Try again.", 'error');
+          } else if (updatedPicUrl) {
+            showStatus("✓ Profile & photo saved successfully!", 'success');
+          } else {
+            showStatus("✓ Profile saved successfully!", 'success');
+          }
+          
+          // Clear file input and preview label
+          picInput.value = '';
+          const previewLabel = document.getElementById('previewLabel');
+          if (previewLabel) previewLabel.style.display = 'none';
+          
+          // Reset avatar border
+          const largePicEl = document.getElementById('profilePicLarge');
+          if (largePicEl) largePicEl.style.borderColor = 'var(--color-bg)';
+
+          loadProfile(); // Refresh UI with saved data
+
+          // Verify the photo URL is accessible (debug helper)
+          if (updatedPicUrl) {
+            fetch(updatedPicUrl, { method: 'HEAD' }).then(res => {
+              if (res.ok) {
+                console.log("[Profile] ✓ Photo URL is accessible:", res.status);
+              } else {
+                console.error("[Profile] ✗ Photo URL returned error:", res.status, "— The storage bucket may not be public. Go to Supabase → Storage → profiles → Settings → Toggle 'Public bucket' ON");
+                showStatus("⚠ Photo saved but may not be visible. Check Supabase Storage bucket is set to PUBLIC.", 'error');
+              }
+            }).catch(err => {
+              console.error("[Profile] ✗ Could not reach photo URL:", err.message);
+            });
+          }
+
+          // Auto-hide status after 6 seconds
+          setTimeout(() => {
+            if (uploadStatus) uploadStatus.style.display = 'none';
+          }, 6000);
+
+        } catch (err) {
+          console.error("[Profile] CRITICAL ERROR:", err);
+          showStatus("✗ Error: " + err.message, 'error');
+        } finally {
+          btn.innerText = originalText;
+          btn.disabled = false;
+        }
+      });
+
+      // 5. Initial Fetch of Active Chats
       async function fetchActiveQueue() {
-        console.log("Dashboard: Fetching queue for advisor ID:", session.user.id);
-        
         const { data: chats, error } = await window.supabaseClient
           .from('chats')
           .select('*')
@@ -88,14 +388,11 @@
           .eq('is_active', true)
           .order('created_at', { ascending: false });
 
-        console.log("Dashboard: Query result:", { chats, error });
-
         if (error) {
           console.error("Queue fetch error", error);
           queueList.innerHTML = `<div style="text-align:center; padding:40px; color:red;">Error loading chats: ${error.message}</div>`;
           return;
         }
-
         renderQueue(chats, session.user.id);
       }
 
@@ -154,7 +451,7 @@
         }
       };
 
-      // 4. Real-time Subscription for New Chats
+      // 6. Real-time Subscription for New Chats
       window.supabaseClient
         .channel('dashboard_chats')
         .on('postgres_changes', { 
@@ -163,11 +460,12 @@
           table: 'chats',
           filter: `advisor_id=eq.${session.user.id}`
         }, (payload) => {
-          fetchActiveQueue(); // Refresh the list on any change
+          fetchActiveQueue();
         })
         .subscribe();
 
-      // Initial Call
+      // Initial Calls
+      loadProfile();
       fetchActiveQueue();
 
       // Logout handler

@@ -30,14 +30,38 @@ window.fetchApprovedAdvisors = async function() {
   const { data, error } = await supabaseClient
     .from('advisors')
     .select('*')
-    .eq('is_approved', true)
     .order('created_at', { ascending: false });
 
   if (error) {
     console.error("Error fetching advisors:", error.message);
-    return [];
+    throw error;
   }
   return data;
+};
+
+/**
+ * Fetch platform statistics (total sessions and active advisors)
+ */
+window.fetchPlatformStats = async function() {
+  if (!supabaseClient) return { sessions: 0, advisors: 0 };
+  
+  try {
+    const { count: sessionsCount } = await supabaseClient
+      .from('chats')
+      .select('*', { count: 'exact', head: true });
+      
+    const { count: advisorsCount } = await supabaseClient
+      .from('advisors')
+      .select('*', { count: 'exact', head: true });
+      
+    return {
+      sessions: sessionsCount || 0,
+      advisors: advisorsCount || 0
+    };
+  } catch (err) {
+    console.error("Error fetching stats:", err);
+    return { sessions: 0, advisors: 0 };
+  }
 };
 
 /**
@@ -85,42 +109,60 @@ window.getChatById = async function(chatId) {
  */
 window.initializeYouthSession = async function(username, advisorId) {
   const storageKey = `active_chat_${advisorId}`;
+
+  // Helper to start a local chat session
+  const startLocalChat = () => {
+    let mockChatId = localStorage.getItem(storageKey);
+    if (!mockChatId || !mockChatId.startsWith('local-chat-')) {
+      mockChatId = 'local-chat-' + Date.now();
+    }
+    localStorage.setItem(storageKey, mockChatId);
+    return mockChatId;
+  };
+
+  // Offline / mock mode fast-path
+  if (advisorId === 'mock-evode' || !supabaseClient) {
+    return startLocalChat();
+  }
+
   const existingChatId = localStorage.getItem(storageKey);
 
-  // Verify existing chat is still valid
-  if (existingChatId) {
-    const { data: existingChat } = await supabaseClient
+  try {
+    // Verify existing chat is still valid
+    if (existingChatId && !existingChatId.startsWith('local-chat-')) {
+      const { data: existingChat, error: checkError } = await supabaseClient
+        .from('chats')
+        .select('id, is_active')
+        .eq('id', existingChatId)
+        .single();
+
+      if (!checkError && existingChat && existingChat.is_active) {
+        return existingChatId;
+      }
+    }
+
+    // Create a new chat in Supabase
+    const { data, error } = await supabaseClient
       .from('chats')
-      .select('id, is_active')
-      .eq('id', existingChatId)
+      .insert({
+        youth_username: username || 'Anonymous',
+        advisor_id: advisorId,
+        is_active: true
+      })
+      .select()
       .single();
 
-    if (existingChat && existingChat.is_active) {
-      return existingChatId;
-    } else {
-      // Chat was ended or deleted, clear it
-      localStorage.removeItem(storageKey);
+    if (error) {
+      console.warn("Supabase chat creation failed, falling back to local chat. Error:", error.message);
+      return startLocalChat();
     }
+
+    localStorage.setItem(storageKey, data.id);
+    return data.id;
+  } catch (err) {
+    console.warn("Network or database error, falling back to local chat:", err);
+    return startLocalChat();
   }
-
-  // Create a new chat
-  const { data, error } = await supabaseClient
-    .from('chats')
-    .insert({
-      youth_username: username || 'Anonymous',
-      advisor_id: advisorId,
-      is_active: true
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error creating chat:", error.message);
-    throw error;
-  }
-
-  localStorage.setItem(storageKey, data.id);
-  return data.id;
 };
 
 // =============================================
@@ -131,6 +173,17 @@ window.initializeYouthSession = async function(username, advisorId) {
  * Send a message to a chat.
  */
 window.sendMessage = async function(chatId, senderId, senderRole, content) {
+  // Offline / mock mode: store in localStorage
+  if (String(chatId).startsWith('local-chat-')) {
+    const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    const msg = { id: msgId, chat_id: chatId, sender_id: senderId, role: senderRole, content: content, created_at: new Date().toISOString() };
+    const key = `local_messages_${chatId}`;
+    const msgs = JSON.parse(localStorage.getItem(key) || '[]');
+    msgs.push(msg);
+    localStorage.setItem(key, JSON.stringify(msgs));
+    return msg;
+  }
+
   const { data, error } = await supabaseClient
     .from('messages')
     .insert({
@@ -180,6 +233,14 @@ window.deleteMessage = async function(messageId) {
  * @param {function} onDelete - Called with (messageId) when a message is deleted
  */
 window.listenForMessages = function(chatId, callback, onDelete) {
+  // Offline / mock mode: load from localStorage
+  if (String(chatId).startsWith('local-chat-')) {
+    const key = `local_messages_${chatId}`;
+    const msgs = JSON.parse(localStorage.getItem(key) || '[]');
+    msgs.forEach(msg => callback(msg, true));
+    return { unsubscribe: () => {} };
+  }
+
   // Set to track message IDs we've already delivered to avoid duplicates
   const deliveredIds = new Set();
 
@@ -248,6 +309,86 @@ window.endChat = async function(chatId) {
 
   if (error) {
     console.error("Error ending chat:", error.message);
+    throw error;
+  }
+};
+
+// =============================================
+// PROFILE PICTURE UPLOAD
+// =============================================
+
+/**
+ * Upload a profile picture to Supabase Storage and return the public URL.
+ * @param {string} userId - The advisor's UUID (used in filename)
+ * @param {File} file - The image file to upload
+ * @param {function} [onProgress] - Optional callback for status updates: onProgress(statusText)
+ * @returns {Promise<string|null>} The public URL of the uploaded image, or null on failure
+ */
+window.uploadProfilePicture = async function(userId, file, onProgress) {
+  if (!supabaseClient) {
+    console.error("Supabase not initialized");
+    return null;
+  }
+
+  // Validate file type
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.");
+  }
+
+  // Validate file size (max 5MB)
+  const maxSize = 5 * 1024 * 1024;
+  if (file.size > maxSize) {
+    throw new Error("File is too large. Maximum size is 5MB.");
+  }
+
+  if (onProgress) onProgress("Uploading photo...");
+
+  const fileExt = file.name.split('.').pop().toLowerCase();
+  const fileName = `${userId}-${Date.now()}.${fileExt}`;
+
+  // Attempt upload
+  const { data: uploadData, error: uploadErr } = await supabaseClient.storage
+    .from('Profile')
+    .upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (uploadErr) {
+    // Provide helpful error for missing bucket
+    if (uploadErr.message.includes('bucket') || uploadErr.message.includes('not found') || uploadErr.message.includes('Bucket')) {
+      throw new Error(
+        "Storage bucket 'Profile' is not set up.\n\n" +
+        "To fix: Go to Supabase Dashboard → Storage → New Bucket → Name: 'Profile' → Enable 'Public bucket' → Save."
+      );
+    }
+    throw new Error("Upload failed: " + uploadErr.message);
+  }
+
+  if (onProgress) onProgress("Processing...");
+
+  // Get public URL
+  const { data: publicUrlData } = supabaseClient.storage
+    .from('Profile')
+    .getPublicUrl(fileName);
+
+  return publicUrlData.publicUrl;
+};
+
+/**
+ * Update the advisor's profile picture URL in the database.
+ * @param {string} userId - The advisor's UUID
+ * @param {string} url - The new profile picture URL
+ */
+window.updateAdvisorProfilePicture = async function(userId, url) {
+  const { error } = await supabaseClient
+    .from('advisors')
+    .update({ profile_picture_url: url })
+    .eq('id', userId);
+
+  if (error) {
+    console.error("Error updating profile picture:", error.message);
     throw error;
   }
 };

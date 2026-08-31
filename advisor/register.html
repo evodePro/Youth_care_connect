@@ -61,8 +61,9 @@
         </div>
 
         <div class="input-group">
-          <label>Profile Picture (Optional)</label>
-          <input type="file" id="profilePic" accept="image/*" style="padding:10px; background:#F8FAFC;" />
+          <label>Profile Picture <span style="color:var(--color-accent); font-weight:500;">(Highly Recommended)</span></label>
+          <input type="file" id="profilePic" accept="image/jpeg,image/png,image/gif,image/webp" style="padding:10px; background:#F8FAFC;" />
+          <p style="font-size:0.8rem; margin-top:8px; color:var(--color-text-light);">Max 5MB · JPEG, PNG, GIF, or WebP · Youth can see your photo before connecting!</p>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
@@ -160,23 +161,15 @@
           let profilePicUrl = null;
           const picInput = document.getElementById('profilePic');
           if (picInput.files && picInput.files.length > 0) {
-            btn.innerText = "Uploading Photo...";
-            const file = picInput.files[0];
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${authData.user.id}-${Date.now()}.${fileExt}`;
-            
-            const { data: uploadData, error: uploadErr } = await window.supabaseClient.storage
-              .from('profiles')
-              .upload(fileName, file);
-              
-            if (uploadErr) {
+            try {
+              profilePicUrl = await window.uploadProfilePicture(
+                authData.user.id,
+                picInput.files[0],
+                (status) => { btn.innerText = status; }
+              );
+            } catch (uploadErr) {
               console.error("Upload error:", uploadErr);
-              alert("Could not upload profile picture, but registration will continue. Error: " + uploadErr.message);
-            } else {
-              const { data: publicUrlData } = window.supabaseClient.storage
-                .from('profiles')
-                .getPublicUrl(fileName);
-              profilePicUrl = publicUrlData.publicUrl;
+              alert("Could not upload profile picture, but registration will continue.\n\n" + uploadErr.message);
             }
           }
 

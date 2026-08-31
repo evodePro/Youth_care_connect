@@ -245,16 +245,18 @@
           for (let i = 0; i < c.full_name.length; i++) hash = c.full_name.charCodeAt(i) + ((hash << 5) - hash);
           const hue = Math.abs(hash % 360);
 
+          const hasPhoto = !!c.profile_picture_url;
           const avatarHtml = c.profile_picture_url 
-            ? `<img src="${c.profile_picture_url}" alt="${c.full_name}" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" />`
-            : `<div style="width: 64px; height: 64px; border-radius: 50%; background: hsl(${hue}, 45%, 90%); color: hsl(${hue}, 55%, 40%); font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${initials}</div>`;
+            ? `<img src="${c.profile_picture_url}" alt="${c.full_name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 16px rgba(13,148,136,0.2); border: 3px solid var(--color-primary);" />`
+            : `<div style="width: 80px; height: 80px; border-radius: 50%; background: hsl(${hue}, 45%, 90%); color: hsl(${hue}, 55%, 40%); font-size: 1.8rem; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 3px dashed var(--color-card-border);">${initials}</div>`;
 
           card.innerHTML = `
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
               ${avatarHtml}
-              <div>
+              <div style="flex: 1;">
                 <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--color-text); margin: 0;">${c.full_name}</h3>
                 <span style="font-size: 0.85rem; color: var(--color-accent); font-weight: 500;">${c.role}</span>
+                ${hasPhoto ? '<span style="display:inline-block; margin-left:8px; font-size:0.7rem; background:#D1FAE5; color:#065F46; padding:2px 8px; border-radius:10px;">✓ Photo</span>' : ''}
               </div>
             </div>
             <div class="advisor-status">

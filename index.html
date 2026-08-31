@@ -28,6 +28,7 @@
       <div class="nav-links">
         <a href="#services">Services</a>
         <a href="quizzes.html">Resources</a>
+        <a href="cycle-tracker.html">Cycle Tracker</a>
         <a href="#about">About us</a>
         <a href="#faq">FAQ</a>
       </div>
@@ -63,17 +64,17 @@
   <section class="stats section-padding" id="about">
     <div class="container stats-container">
       <div class="stat-item fade-in">
-        <h2 class="stat-number" data-target="2468">0</h2>
+        <h2 class="stat-number" id="stat-sessions" data-target="1450">0</h2>
         <p class="stat-label">Sessions held</p>
         <p class="stat-desc">Anonymous consultations completed</p>
       </div>
       <div class="stat-item fade-in">
-        <h2 class="stat-number" data-target="100" data-prefix="+">+0</h2>
+        <h2 class="stat-number" id="stat-advisors" data-target="45" data-prefix="+">+0</h2>
         <p class="stat-label">Verified Specialists</p>
-        <p class="stat-desc">Doctors and trained advisors on call</p>
+        <p class="stat-desc">Available 24/7 for youth support</p>
       </div>
       <div class="stat-item fade-in">
-        <h2 class="stat-number" data-target="98" data-suffix="%">0%</h2>
+        <h2 class="stat-number" data-target="100" data-suffix="%">0%</h2>
         <p class="stat-label">Privacy Guaranteed</p>
         <p class="stat-desc">Complete anonymity for youth</p>
       </div>
@@ -93,7 +94,6 @@
           <span class="tag">Mental Health</span>
           <span class="tag">Relationships</span>
           <span class="tag">Contraception</span>
-          <span class="tag">+20 more</span>
         </div>
       </div>
       
@@ -126,11 +126,7 @@
         <button class="btn btn-secondary mt-4" onclick="window.location.href='quizzes.html'">Explore Quizzes</button>
       </div>
       <div class="quizzes-cards">
-        <div class="quiz-card card-1 slide-up">
-          <div class="quiz-badge">New</div>
-          <h4>Myth vs Fact: Puberty</h4>
-          <p>Test your knowledge on common body changes.</p>
-        </div>
+
         <div class="quiz-card card-2 slide-up delay-1">
           <h4>Stress Relief Minigame</h4>
           <p>Take a 5-minute break to clear your mind.</p>
@@ -289,6 +285,9 @@
             <a href="quizzes.html" style="text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--color-card-bg); border-radius: var(--radius-md); color: var(--color-accent); font-weight: 600; border: 1px solid var(--color-accent); transition: all 0.2s;">
               2. Play Health Quizzes <span class="icon">→</span>
             </a>
+            <a href="cycle-tracker.html" style="text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--color-card-bg); border-radius: var(--radius-md); color: var(--color-accent); font-weight: 600; border: 1px solid var(--color-accent); transition: all 0.2s;">
+              3. Track Your Cycle <span class="icon">→</span>
+            </a>
           </div>
         </div>
       </div>
@@ -340,7 +339,7 @@
       <div>
         <h4>Resources</h4>
         <ul>
-          <li><a href="#">Articles</a></li>
+          <li><a href="articles.html">Articles</a></li>
           <li><a href="#">Quizzes</a></li>
           <li><a href="#">Find a Facility</a></li>
         </ul>
@@ -348,7 +347,7 @@
       <div>
         <h4>Legal</h4>
         <ul>
-          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
           <li><a href="#">Terms of Service</a></li>
           <li><a href="#">Data Protection</a></li>
         </ul>

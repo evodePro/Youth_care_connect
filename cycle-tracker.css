@@ -1,0 +1,319 @@
+/* ========================================= */
+/* CYCLE TRACKER STYLES                      */
+/* ========================================= */
+
+.ct-main-column {
+  flex: 2;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.ct-side-column {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.ct-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+@media (min-width: 992px) {
+  .ct-layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+/* WIZARD & MONTH CARDS */
+.ct-wizard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .ct-wizard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .ct-wizard-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.ct-month-card {
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  background: var(--color-card-bg);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.ct-month-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ct-month-card.disabled input, 
+.ct-month-card.disabled button {
+  pointer-events: none;
+}
+
+.ct-month-card.active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.ct-month-card.completed {
+  border-color: #10B981; /* Success Green */
+}
+
+.ct-month-header {
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.03);
+  border-bottom: 1px solid var(--color-card-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+[data-theme="dark"] .ct-month-header {
+  background: rgba(255,255,255,0.03);
+}
+
+.ct-month-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.ct-check {
+  color: #10B981;
+  font-weight: bold;
+}
+
+.ct-month-body {
+  padding: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  color: var(--color-text-light);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-main);
+  background: var(--color-bg);
+  color: var(--color-text);
+  color-scheme: light dark;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* PROGRESS BAR */
+.ct-progress {
+  height: 8px;
+  background: var(--color-card-border);
+  border-radius: var(--radius-full);
+  position: relative;
+  overflow: hidden;
+}
+
+.ct-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+.ct-progress-text {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  text-align: right;
+}
+
+/* PREDICTIONS */
+.ct-prediction-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(0,0,0,0.02);
+}
+
+[data-theme="dark"] .ct-prediction-item {
+  background: rgba(255,255,255,0.02);
+}
+
+.ct-pred-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.ct-color-period { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
+.ct-color-fertile { background: rgba(244, 63, 94, 0.15); color: #F43F5E; }
+.ct-color-ovulation { background: rgba(139, 92, 246, 0.15); color: #8B5CF6; }
+
+.ct-pred-label {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+}
+
+.ct-pred-value {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* CALENDAR */
+.ct-cal-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+}
+
+.ct-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ct-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ct-dot.period { background: #EF4444; }
+.ct-dot.fertile { background: #F43F5E; }
+.ct-dot.ovulation { background: #8B5CF6; }
+
+.ct-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.ct-cal-header {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+  padding: 8px 0;
+}
+
+.ct-cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  position: relative;
+}
+
+.ct-cal-day.padding {
+  background: transparent;
+}
+
+.ct-cal-day.today {
+  border: 2px solid var(--color-text);
+  font-weight: bold;
+}
+
+.ct-cal-day.period {
+  background: #EF4444;
+  color: white;
+}
+
+.ct-cal-day.fertile {
+  background: rgba(244, 63, 94, 0.15);
+  color: #F43F5E;
+}
+
+.ct-cal-day.ovulation {
+  background: #8B5CF6;
+  color: white;
+  font-weight: bold;
+}
+
+.ct-cal-day.period.fertile {
+  background: linear-gradient(135deg, #EF4444 50%, rgba(244, 63, 94, 0.2) 50%);
+  color: white;
+}
+
+/* SUMMARY STATS */
+.ct-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.ct-stat-box {
+  background: var(--color-bg);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.ct-stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.ct-stat-label {
+  font-size: 0.9rem;
+  color: var(--color-text-light);
+}
+
+/* DISCLAIMER */
+.ct-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(13, 148, 136, 0.05);
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+}
+
+/* UTILS */
+.card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+}
+
+.d-flex { display: flex; }
+.justify-content-between { justify-content: space-between; }
+.align-items-center { align-items: center; }
+.m-0 { margin: 0; }
+.badge { padding: 4px 10px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; }
+.badge-success { background: rgba(16, 185, 129, 0.15); color: #10B981; }

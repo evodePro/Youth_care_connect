@@ -60,7 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
         x: e.clientX - rect.left - 150,
         y: e.clientY - rect.top - 150,
         duration: 0.8,
-        ease: "power2.out"
+        ease: "power2.out",
+        overwrite: "auto"
       });
     });
   }
@@ -229,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ANIMATED NUMBER COUNTERS
   // =========================================
   function animateCounter(stat) {
-    const target = parseInt(stat.getAttribute("data-target"));
+    const target = parseInt(stat.getAttribute("data-target")) || 0;
     const prefix = stat.getAttribute("data-prefix") || "";
     const suffix = stat.getAttribute("data-suffix") || "";
 
@@ -239,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
     gsap.to(obj, {
       val: target,
       duration: 2.5,
-      delay: 0.4,
+      delay: 0.1,
       ease: "power2.out",
       onUpdate: function() {
         let num = Math.floor(obj.val);
@@ -294,7 +295,8 @@ document.addEventListener("DOMContentLoaded", () => {
         rotateY: rotateY,
         transformPerspective: 800,
         duration: 0.4,
-        ease: "power2.out"
+        ease: "power2.out",
+        overwrite: "auto"
       });
     });
 
@@ -309,12 +311,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const slider = document.querySelector(".testimonial-slider");
   if (slider) {
     let scrollDir = 1;
-    function autoScroll() {
-      if (slider.scrollLeft >= slider.scrollWidth - slider.clientWidth - 5) scrollDir = -1;
-      if (slider.scrollLeft <= 5) scrollDir = 1;
-      slider.scrollBy({ left: scrollDir * 1, behavior: "auto" });
+    let isHovered = false;
+    
+    slider.addEventListener("mouseenter", () => isHovered = true);
+    slider.addEventListener("mouseleave", () => isHovered = false);
+
+    let lastTime = 0;
+    function autoScroll(time) {
+      if (!isHovered && time - lastTime > 30) {
+        if (slider.scrollLeft >= slider.scrollWidth - slider.clientWidth - 5) scrollDir = -1;
+        if (slider.scrollLeft <= 5) scrollDir = 1;
+        slider.scrollLeft += scrollDir * 1;
+        lastTime = time;
+      }
+      requestAnimationFrame(autoScroll);
     }
-    setInterval(autoScroll, 30);
+    requestAnimationFrame(autoScroll);
   }
 
   // =========================================
@@ -347,7 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const rect = btn.getBoundingClientRect();
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
-      gsap.to(btn, { x: x * 0.2, y: y * 0.2, duration: 0.3, ease: "power2.out" });
+      gsap.to(btn, { x: x * 0.2, y: y * 0.2, duration: 0.3, ease: "power2.out", overwrite: "auto" });
     });
     btn.addEventListener("mouseleave", () => {
       gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.4)" });

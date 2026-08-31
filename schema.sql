@@ -173,17 +173,24 @@ $$;
 -- ==========================================
 -- 6. STORAGE BUCKET FOR PROFILE PICTURES
 -- ==========================================
--- Create the storage bucket (run these via Supabase SQL Editor if they don't apply automatically)
-INSERT INTO storage.buckets (id, name, public) 
-VALUES ('profiles', 'profiles', true)
-ON CONFLICT (id) DO NOTHING;
+-- The bucket "Profile" should already exist (created via Supabase Dashboard).
+-- If not, create it manually: Dashboard → Storage → New Bucket → Name: "Profile" → Public: ON
 
--- Storage RLS Policies
+-- Storage RLS Policies (REQUIRED — without these, uploads will fail)
 DROP POLICY IF EXISTS "Public can view profile pictures" ON storage.objects;
 CREATE POLICY "Public can view profile pictures" ON storage.objects
-  FOR SELECT USING (bucket_id = 'profiles');
+  FOR SELECT USING (bucket_id = 'Profile');
 
 DROP POLICY IF EXISTS "Authenticated users can upload profile pictures" ON storage.objects;
 CREATE POLICY "Authenticated users can upload profile pictures" ON storage.objects
-  FOR INSERT WITH CHECK (bucket_id = 'profiles' AND auth.role() = 'authenticated');
+  FOR INSERT WITH CHECK (bucket_id = 'Profile' AND auth.role() = 'authenticated');
 
+-- Allow authenticated users to update/replace their own profile pictures
+DROP POLICY IF EXISTS "Users can update own profile pictures" ON storage.objects;
+CREATE POLICY "Users can update own profile pictures" ON storage.objects
+  FOR UPDATE USING (bucket_id = 'Profile' AND auth.role() = 'authenticated');
+
+-- Allow authenticated users to delete their own profile pictures
+DROP POLICY IF EXISTS "Users can delete own profile pictures" ON storage.objects;
+CREATE POLICY "Users can delete own profile pictures" ON storage.objects
+  FOR DELETE USING (bucket_id = 'Profile' AND auth.role() = 'authenticated');

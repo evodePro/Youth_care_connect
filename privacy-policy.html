@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy & Safety - YouthCare Connect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="privacy.css" />
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo" style="text-decoration:none;">
+        <img src="assets/youthcare_logo.png" alt="YouthCare Logo" />
+        YouthCare Connect
+      </a>
+      <div class="nav-links">
+        <a href="index.html#services">Services</a>
+        <a href="quizzes.html">Resources</a>
+        <a href="index.html#about">About us</a>
+        <a href="index.html#faq">FAQ</a>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Mode">
+          <svg class="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn btn-primary" onclick="window.location.href='directory.html'">Find An Advisor</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="privacy-main">
+    <div class="privacy-container">
+      
+      <!-- 1. Welcome Screen -->
+      <section class="privacy-header animate-fade-in">
+        <div class="shield-illustration">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <div class="shield-badge">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+        </div>
+        <h1>Your Privacy Comes First</h1>
+        <p>YouthCare Connect protects your identity and conversations so you can seek support safely without fear of judgment.</p>
+        <div class="mt-4 flex gap-4 justify-center" style="display: flex; gap: 16px; justify-content: center;">
+          <button class="btn btn-primary" onclick="document.getElementById('consent-section').scrollIntoView({behavior: 'smooth'})">Continue Safely</button>
+          <button class="btn btn-outline" onclick="document.getElementById('anon-section').scrollIntoView({behavior: 'smooth'})">Learn More</button>
+        </div>
+      </section>
+
+      <!-- 2. Anonymous Protection -->
+      <section id="anon-section" class="privacy-section reveal">
+        <h2 class="privacy-section-title">
+          <div class="icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle><line x1="2" y1="2" x2="22" y2="22"></line></svg>
+          </div>
+          Anonymous Protection
+        </h2>
+        <div class="privacy-card">
+          <p class="mb-4">You have the right to remain completely anonymous. We do not require your real name or contact details to chat with an advisor.</p>
+          
+          <div class="anon-cards">
+            <div class="anon-card">
+              <div class="anon-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              </div>
+              <h4>Use Nicknames</h4>
+              <p style="font-size: 0.9rem; margin-top: 8px;">Choose any display name you feel comfortable with.</p>
+            </div>
+            <div class="anon-card">
+              <div class="anon-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              </div>
+              <h4>No Public Profile</h4>
+              <p style="font-size: 0.9rem; margin-top: 8px;">You are never searchable or visible to other users.</p>
+            </div>
+          </div>
+
+          <div class="anon-id-example">
+            <div class="anon-avatar">B</div>
+            <div class="anon-details">
+              <div class="anon-name">BlueSky22</div>
+              <div class="anon-tag">Anonymous User</div>
+            </div>
+            <div style="color: var(--color-primary);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Secure Messaging -->
+      <section class="privacy-section reveal">
+        <h2 class="privacy-section-title">
+          <div class="icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </div>
+          Secure & Private Messaging
+        </h2>
+        <div class="privacy-card">
+          <p>Your conversations are stored securely and protected by Row Level Security (RLS). No one outside of your specific chat session can read your messages.</p>
+          
+
+
+          <div class="encryption-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Secured by End-to-End Encryption Technology
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Verified Professional Protection -->
+      <section class="privacy-section reveal">
+        <h2 class="privacy-section-title">
+          <div class="icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </div>
+          Verified Professionals
+        </h2>
+        <div class="privacy-card">
+          <p>Every advisor on our platform goes through a strict internal verification process. Medical licenses and credentials are checked securely by our admin team before they can talk to you.</p>
+          
+          <div class="trust-flow">
+            <div class="trust-step">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span>Submit Credentials</span>
+            </div>
+            <div class="trust-step">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              <span>Internal Review</span>
+            </div>
+            <div class="trust-step" style="border-color: var(--color-primary); background: var(--color-primary-light);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              <span style="color: var(--color-primary);">Verified Professional</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. User Rights Dashboard -->
+      <section class="privacy-section reveal">
+        <h2 class="privacy-section-title">
+          <div class="icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          Your Data, Your Control
+        </h2>
+        <div class="privacy-card">
+          <p>You have full control over your experience. Manage your data and boundaries instantly.</p>
+          
+          <div class="rights-grid">
+            <div class="right-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Delete My Data</span>
+            </div>
+            <div class="right-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+              <span>Clear Chat History</span>
+            </div>
+
+            <div class="right-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <span>Report Behavior</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Safety & Emergency Support -->
+      <section class="privacy-section reveal">
+        <h2 class="privacy-section-title">
+          <div class="icon" style="color: var(--color-accent); background: rgba(249, 112, 102, 0.1);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+          </div>
+          Safety & Emergency Support
+        </h2>
+        <div class="privacy-card">
+          <p>We care about your wellbeing. YouthCare Connect provides guidance and a listening ear, but we are not a substitute for emergency medical care.</p>
+          
+          <div class="safety-alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <div class="safety-content">
+              <h4>In Crisis?</h4>
+              <p>If you or someone you know is at immediate risk of self-harm, please step away from the app and contact your local emergency services or a dedicated crisis hotline immediately.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Consent & Agreement -->
+      <section id="consent-section" class="privacy-section reveal">
+        <div class="consent-section">
+          <h2 class="mb-4">Ready to Connect?</h2>
+          <p class="mb-5">Please acknowledge our privacy and safety guidelines before entering the platform.</p>
+          
+          <div class="checkbox-group">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="privacyCheck">
+              <div class="checkmark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+              <span class="checkbox-text">I agree to the YouthCare Connect Privacy Policy and understand my data is protected.</span>
+            </label>
+            
+            <label class="custom-checkbox">
+              <input type="checkbox" id="limitsCheck">
+              <div class="checkmark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+              <span class="checkbox-text">I understand this platform is for guidance and support, not for medical emergencies.</span>
+            </label>
+          </div>
+
+          <button id="enterBtn" class="btn-glowing">Enter YouthCare Connect</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer section-padding">
+    <div class="container footer-grid">
+      <div>
+        <h3>YouthCare Connect</h3>
+        <p class="mt-4 opacity-70">Empowering rural youth with accessible, non-judgmental, and confidential health guidance.</p>
+      </div>
+      <div>
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="articles.html">Articles</a></li>
+          <li><a href="quizzes.html">Quizzes</a></li>
+          <li><a href="#">Find a Facility</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Data Protection</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="privacy.js"></script>
+</body>
+</html>

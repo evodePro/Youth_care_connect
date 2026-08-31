@@ -224,8 +224,8 @@ p {
 .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 1.5rem;
+  gap: 10px;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-text);
   text-decoration: none;
@@ -234,9 +234,10 @@ p {
 }
 
 .logo img {
-  height: 60px;
-  width: 200px;
+  height: 56px;
+  width: auto;
   object-fit: contain;
+  border-radius: 12px;
 }
 
 /* THEME TOGGLE */
@@ -285,13 +286,7 @@ p {
   transform: rotate(0) scale(1);
 }
 
-.logo img {
-  height: 60px;
-  width: 200px;
-  margin-right: 12px;
-  border-radius: 10px;
-  object-fit: contain;
-}
+/* duplicate .logo img removed — defined above */
 
 .navbar.scrolled .logo {
   color: var(--color-text);
@@ -306,20 +301,21 @@ p {
 /* SEARCH BAR IN NAVBAR */
 .nav-search {
   flex: 1;
-  max-width: 400px;
+  min-width: 260px;
+  max-width: 420px;
   position: relative;
-  margin: 0 20px;
+  margin: 0 12px;
 }
 
 .nav-search input {
   width: 100%;
-  padding: 10px 16px 10px 42px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 11px 18px 11px 42px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: var(--radius-full);
   color: white;
   font-family: var(--font-main);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
 }
 
